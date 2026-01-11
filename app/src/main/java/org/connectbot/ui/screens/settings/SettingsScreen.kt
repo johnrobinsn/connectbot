@@ -75,9 +75,9 @@ import org.connectbot.util.TerminalFont
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val viewModel: SettingsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
@@ -177,6 +177,8 @@ fun SettingsScreen(
         onBellVolumeChange = viewModel::updateBellVolume,
         onBellVibrateChange = viewModel::updateBellVibrate,
         onBellNotificationChange = viewModel::updateBellNotification,
+        onVirtualWidthEnabledChange = viewModel::updateVirtualWidthEnabled,
+        onVirtualWidthColumnsChange = viewModel::updateVirtualWidthColumns,
         modifier = modifier
     )
 }
@@ -218,6 +220,8 @@ fun SettingsScreenContent(
     onBellVolumeChange: (Float) -> Unit,
     onBellVibrateChange: (Boolean) -> Unit,
     onBellNotificationChange: (Boolean) -> Unit,
+    onVirtualWidthEnabledChange: (Boolean) -> Unit,
+    onVirtualWidthColumnsChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -433,6 +437,15 @@ fun SettingsScreenContent(
                     summary = stringResource(R.string.pref_keepalive_summary),
                     checked = uiState.keepalive,
                     onCheckedChange = onKeepAliveChange
+                )
+            }
+
+            item {
+                VirtualWidthPreference(
+                    enabled = uiState.virtualWidthEnabled,
+                    columns = uiState.virtualWidthColumns,
+                    onEnabledChange = onVirtualWidthEnabledChange,
+                    onColumnsChange = onVirtualWidthColumnsChange
                 )
             }
 
@@ -894,6 +907,154 @@ private fun SliderPreference(
 }
 
 @Composable
+private fun VirtualWidthPreference(
+    enabled: Boolean,
+    columns: Int,
+    onEnabledChange: (Boolean) -> Unit,
+    onColumnsChange: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showColumnsDialog by remember { mutableStateOf(false) }
+
+    Column(modifier = modifier) {
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.pref_virtual_width_title)) },
+            supportingContent = {
+                Text(
+                    if (enabled) {
+                        stringResource(R.string.pref_virtual_width_summary_enabled, columns)
+                    } else {
+                        stringResource(R.string.pref_virtual_width_summary_disabled)
+                    }
+                )
+            },
+            trailingContent = {
+                Switch(
+                    checked = enabled,
+                    onCheckedChange = onEnabledChange
+                )
+            },
+            modifier = Modifier.clickable { onEnabledChange(!enabled) }
+        )
+
+        // Show column count selector when enabled
+        if (enabled) {
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.pref_virtual_width_columns_title)) },
+                supportingContent = {
+                    Text(stringResource(R.string.pref_virtual_width_columns_summary, columns))
+                },
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .clickable { showColumnsDialog = true }
+            )
+        }
+
+        HorizontalDivider()
+    }
+
+    if (showColumnsDialog) {
+        VirtualWidthColumnsDialog(
+            currentColumns = columns,
+            onDismiss = { showColumnsDialog = false },
+            onConfirm = { newColumns ->
+                onColumnsChange(newColumns)
+                showColumnsDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+private fun VirtualWidthColumnsDialog(
+    currentColumns: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var showCustomInput by remember { mutableStateOf(false) }
+    var customValue by remember { mutableStateOf(currentColumns.toString()) }
+
+    val presetValues = listOf(80, 120, 160, 200)
+
+    if (showCustomInput) {
+        AlertDialog(
+            onDismissRequest = {
+                showCustomInput = false
+                onDismiss()
+            },
+            title = { Text(stringResource(R.string.pref_virtual_width_columns_title)) },
+            text = {
+                OutlinedTextField(
+                    value = customValue,
+                    onValueChange = { customValue = it },
+                    label = { Text(stringResource(R.string.dialog_virtual_width_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val value = customValue.toIntOrNull()
+                        if (value != null && value >= 40) {
+                            onConfirm(value)
+                        }
+                    },
+                    enabled = customValue.toIntOrNull()?.let { it >= 40 } == true
+                ) {
+                    Text(stringResource(android.R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showCustomInput = false
+                    onDismiss()
+                }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            }
+        )
+    } else {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(R.string.pref_virtual_width_columns_title)) },
+            text = {
+                Column {
+                    presetValues.forEach { value ->
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    stringResource(R.string.virtual_width_columns_option, value)
+                                )
+                            },
+                            modifier = Modifier.clickable { onConfirm(value) }
+                        )
+                    }
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(R.string.virtual_width_custom),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        modifier = Modifier.clickable {
+                            customValue = currentColumns.toString()
+                            showCustomInput = true
+                        }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.delete_neg))
+                }
+            }
+        )
+    }
+}
+
+@Composable
 private fun AddCustomTerminalTypePreference(
     customTerminalTypes: List<String>,
     onAddTerminalType: (String) -> Unit,
@@ -1058,7 +1219,9 @@ private fun AddCustomFontPreference(
                             { Text(validationError, color = MaterialTheme.colorScheme.error) }
                         } else if (validationInProgress) {
                             { Text(stringResource(R.string.font_validating)) }
-                        } else null,
+                        } else {
+                            null
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -1130,8 +1293,11 @@ private fun LocalFontPreference(
             headlineContent = { Text(stringResource(R.string.pref_localfont_title)) },
             supportingContent = {
                 Text(
-                    if (importInProgress) stringResource(R.string.font_importing)
-                    else stringResource(R.string.pref_localfont_summary)
+                    if (importInProgress) {
+                        stringResource(R.string.font_importing)
+                    } else {
+                        stringResource(R.string.pref_localfont_summary)
+                    }
                 )
             },
             modifier = Modifier.clickable(enabled = !importInProgress) {
@@ -1193,7 +1359,9 @@ private fun LocalFontPreference(
                             { Text(importError, color = MaterialTheme.colorScheme.error) }
                         } else if (importInProgress) {
                             { Text(stringResource(R.string.font_importing)) }
-                        } else null,
+                        } else {
+                            null
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -1307,7 +1475,9 @@ private fun SettingsScreenPreview() {
             onBellChange = {},
             onBellVolumeChange = {},
             onBellVibrateChange = {},
-            onBellNotificationChange = {}
+            onBellNotificationChange = {},
+            onVirtualWidthEnabledChange = {},
+            onVirtualWidthColumnsChange = {}
         )
     }
 }

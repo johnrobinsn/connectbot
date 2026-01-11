@@ -71,6 +71,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -119,13 +120,13 @@ import timber.log.Timber
  */
 @Composable
 private fun rememberHasHardwareKeyboard(): Boolean {
-	val configuration = LocalConfiguration.current
+    val configuration = LocalConfiguration.current
 
-	return remember(configuration) {
-		val keyboardType = configuration.keyboard
-		keyboardType == android.content.res.Configuration.KEYBOARD_QWERTY ||
-				keyboardType == android.content.res.Configuration.KEYBOARD_12KEY
-	}
+    return remember(configuration) {
+        val keyboardType = configuration.keyboard
+        keyboardType == android.content.res.Configuration.KEYBOARD_QWERTY ||
+            keyboardType == android.content.res.Configuration.KEYBOARD_12KEY
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -133,10 +134,12 @@ private fun rememberHasHardwareKeyboard(): Boolean {
 fun ConsoleScreen(
     onNavigateBack: () -> Unit,
     onNavigateToPortForwards: (Long) -> Unit,
+    @Suppress("UNUSED_PARAMETER") modifier: Modifier = Modifier,
+    viewModel: ConsoleViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val currentOnNavigateBack by rememberUpdatedState(onNavigateBack)
     val terminalManager = LocalTerminalManager.current
-    val viewModel: ConsoleViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(terminalManager) {
@@ -149,6 +152,18 @@ fun ConsoleScreen(
     var fullscreen by remember { mutableStateOf(prefs.getBoolean("fullscreen", false)) }
     var titleBarHide by remember { mutableStateOf(prefs.getBoolean("titlebarhide", false)) }
     val volumeKeysChangeFontSize = remember { prefs.getBoolean(PreferenceConstants.VOLUME_FONT, true) }
+    val virtualWidthEnabled = remember {
+        prefs.getBoolean(
+            PreferenceConstants.VIRTUAL_WIDTH_ENABLED,
+            PreferenceConstants.VIRTUAL_WIDTH_ENABLED_DEFAULT
+        )
+    }
+    val virtualWidthColumns = remember {
+        prefs.getInt(
+            PreferenceConstants.VIRTUAL_WIDTH_COLUMNS,
+            PreferenceConstants.VIRTUAL_WIDTH_COLUMNS_DEFAULT
+        )
+    }
 
     // Keyboard state
     val hasHardwareKeyboard = rememberHasHardwareKeyboard()
@@ -196,7 +211,7 @@ fun ConsoleScreen(
     // Navigate back if all bridges are closed (after initial loading)
     LaunchedEffect(uiState.bridges.size, uiState.isLoading) {
         if (uiState.bridges.isEmpty() && !uiState.isLoading) {
-            onNavigateBack()
+            currentOnNavigateBack()
         }
     }
 
@@ -302,7 +317,7 @@ fun ConsoleScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets
-            .union(WindowInsets.imeAnimationTarget),
+            .union(WindowInsets.imeAnimationTarget)
     ) { innerPadding ->
         // Show tabs if multiple terminals
         if (uiState.bridges.size > 1) {
@@ -348,10 +363,12 @@ fun ConsoleScreen(
                                 currentBridge?.increaseFontSize()
                                 true
                             }
+
                             Key.VolumeDown -> {
                                 currentBridge?.decreaseFontSize()
                                 true
                             }
+
                             else -> false
                         }
                     } else {
@@ -398,6 +415,7 @@ fun ConsoleScreen(
                             }
                         }
 
+                        // Terminal with optional virtual width support
                         Terminal(
                             terminalEmulator = bridge.terminalEmulator,
                             modifier = Modifier
@@ -416,6 +434,9 @@ fun ConsoleScreen(
                             onImeVisibilityChanged = { visible ->
                                 imeVisible = visible
                             },
+                            // Virtual width: only enable when not using forced size
+                            virtualWidthColumns = if (virtualWidthEnabled && forceSize == null) virtualWidthColumns else null,
+                            horizontalScrollIndicatorBottomOffset = if (keyboardAlwaysVisible) TERMINAL_KEYBOARD_HEIGHT_DP.dp else 0.dp
                         )
 
                         // Set up text input request callback from bridge (for camera button)
@@ -623,10 +644,11 @@ fun ConsoleScreen(
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        if (!sessionOpen && disconnected)
+                                        if (!sessionOpen && disconnected) {
                                             stringResource(R.string.console_menu_close)
-                                        else
+                                        } else {
                                             stringResource(R.string.list_host_disconnect)
+                                        }
                                     )
                                 },
                                 onClick = {

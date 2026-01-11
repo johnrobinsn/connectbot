@@ -76,6 +76,8 @@ data class SettingsUiState(
     val fontImportError: String? = null,
     val defaultProfileId: Long = 0L,
     val availableProfiles: List<Profile> = emptyList(),
+    val virtualWidthEnabled: Boolean = false,
+    val virtualWidthColumns: Int = 120
 )
 
 @HiltViewModel
@@ -157,6 +159,14 @@ class SettingsViewModel @Inject constructor(
             customTerminalTypes = customTerminalTypes,
             localFonts = localFonts,
             defaultProfileId = prefs.getLong("defaultProfileId", 0L),
+            virtualWidthEnabled = prefs.getBoolean(
+                PreferenceConstants.VIRTUAL_WIDTH_ENABLED,
+                PreferenceConstants.VIRTUAL_WIDTH_ENABLED_DEFAULT
+            ),
+            virtualWidthColumns = prefs.getInt(
+                PreferenceConstants.VIRTUAL_WIDTH_COLUMNS,
+                PreferenceConstants.VIRTUAL_WIDTH_COLUMNS_DEFAULT
+            )
         )
     }
 
@@ -283,6 +293,18 @@ class SettingsViewModel @Inject constructor(
 
     fun updateBellVolume(value: Float) {
         updateFloatPref("bellVolume", value) { copy(bellVolume = value) }
+    }
+
+    fun updateVirtualWidthEnabled(value: Boolean) {
+        updateBooleanPref(PreferenceConstants.VIRTUAL_WIDTH_ENABLED, value) {
+            copy(virtualWidthEnabled = value)
+        }
+    }
+
+    fun updateVirtualWidthColumns(value: Int) {
+        updateIntPref(PreferenceConstants.VIRTUAL_WIDTH_COLUMNS, value) {
+            copy(virtualWidthColumns = value)
+        }
     }
 
     fun updateFontFamily(value: String) {
@@ -459,6 +481,13 @@ class SettingsViewModel @Inject constructor(
     private fun updateFloatPref(key: String, value: Float, updateState: SettingsUiState.() -> SettingsUiState) {
         viewModelScope.launch {
             prefs.edit { putFloat(key, value) }
+            _uiState.update { it.updateState() }
+        }
+    }
+
+    private fun updateIntPref(key: String, value: Int, updateState: SettingsUiState.() -> SettingsUiState) {
+        viewModelScope.launch {
+            prefs.edit { putInt(key, value) }
             _uiState.update { it.updateState() }
         }
     }

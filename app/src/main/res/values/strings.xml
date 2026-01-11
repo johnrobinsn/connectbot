@@ -334,6 +334,23 @@
 	<!-- Summary for the Wi-Fi lock preference -->
 	<string name="pref_wifilock_summary">"Prevent Wi-Fi from turning off when a session is active"</string>
 
+	<!-- Name for the virtual terminal width preference -->
+	<string name="pref_virtual_width_title">"Virtual terminal width"</string>
+	<!-- Summary for the virtual terminal width preference when enabled -->
+	<string name="pref_virtual_width_summary_enabled">"Terminal renders at %d columns with horizontal panning"</string>
+	<!-- Summary for the virtual terminal width preference when disabled -->
+	<string name="pref_virtual_width_summary_disabled">"Terminal width matches screen width"</string>
+	<!-- Title for the virtual width columns setting -->
+	<string name="pref_virtual_width_columns_title">"Column count"</string>
+	<!-- Summary for the virtual width columns setting -->
+	<string name="pref_virtual_width_columns_summary">"Terminal width: %d columns"</string>
+	<!-- Option format for virtual width column selection -->
+	<string name="virtual_width_columns_option">"%d columns"</string>
+	<!-- Custom option for virtual width -->
+	<string name="virtual_width_custom">"Custom…"</string>
+	<!-- Hint for custom virtual width input -->
+	<string name="dialog_virtual_width_hint">"Columns (min 40)"</string>
+
 	<!-- Name for the haptic feedback (bumpy arrow) preference -->
 	<string name="pref_bumpyarrows_title">"Bumpy arrows"</string>
 	<!-- Summary for the haptic feedback (bumpy arrow) preference -->
