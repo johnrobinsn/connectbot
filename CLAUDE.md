@@ -2,6 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Environment
+
+```bash
+# Android SDK location
+ANDROID_HOME=/home/jr/Android/Sdk
+
+# ADB path (for deploying to devices)
+ADB=/home/jr/Android/Sdk/platform-tools/adb
+
+# Deploy debug APK to Samsung device
+$ADB -s R5CW11Z9QEK install -r app/build/outputs/apk/google/debug/app-google-debug.apk
+```
+
 ## Build Commands
 
 ```bash
