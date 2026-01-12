@@ -298,16 +298,21 @@ fun ConsoleScreen(
         }
     }
 
-    fun handleTerminalInteraction() {
-        // Show emulated keyboard when terminal is tapped (unless always visible)
+    fun handleTerminalTap() {
+        // Toggle emulated keyboard when terminal is tapped (unless always visible)
         if (!keyboardAlwaysVisible) {
-            showExtraKeyboard = true
+            showExtraKeyboard = !showExtraKeyboard
         }
-        // Show title bar temporarily when terminal is tapped (if auto-hide enabled)
+        // Toggle title bar when terminal is tapped (if auto-hide enabled)
         if (titleBarHide) {
-            showTitleBar = true
+            showTitleBar = !showTitleBar
         }
         // Reset the unified timer
+        lastInteractionTime = System.currentTimeMillis()
+    }
+
+    fun handleKeyboardInteraction() {
+        // Reset the unified timer to keep keyboard visible
         lastInteractionTime = System.currentTimeMillis()
     }
 
@@ -430,7 +435,7 @@ fun ConsoleScreen(
                             focusRequester = termFocusRequester,
                             forcedSize = forceSize,
                             modifierManager = bridge.keyHandler,
-                            onTerminalTap = { handleTerminalInteraction() },
+                            onTerminalTap = { handleTerminalTap() },
                             onImeVisibilityChanged = { visible ->
                                 imeVisible = visible
                             },
@@ -458,7 +463,7 @@ fun ConsoleScreen(
                         ) {
                             TerminalKeyboard(
                                 bridge = bridge,
-                                onInteraction = { handleTerminalInteraction() },
+                                onInteraction = { handleKeyboardInteraction() },
                                 onHideIme = {
                                     showSoftwareKeyboard = false
                                 },
