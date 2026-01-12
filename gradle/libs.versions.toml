@@ -25,7 +25,7 @@ navigationCompose = "2.9.6"
 activityCompose = "1.12.2"
 
 sshlib = "2.2.37"
-termlib = "0.0.16"
+termlib = "main-SNAPSHOT"
 playServicesBasement = "18.9.0"
 conscrypt = "2.5.3"
 conscryptOpenJdk = "2.5.2"
@@ -58,7 +58,7 @@ core = "1.17.0"
 
 [libraries]
 sshlib = { module = "org.connectbot:sshlib", version.ref = "sshlib" }
-termlib = { module = "org.connectbot:termlib", version.ref = "termlib" }
+termlib = { module = "com.github.johnrobinsn:termlib", version.ref = "termlib" }
 play-services-basement = { module = "com.google.android.gms:play-services-basement", version.ref = "playServicesBasement" }
 conscrypt-android = { module = "org.conscrypt:conscrypt-android", version.ref = "conscrypt" }
 
