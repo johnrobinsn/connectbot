@@ -167,6 +167,25 @@ Terminal.kt has debug logging enabled (grep `Log.d("Terminal"`). Remove when sta
 - **Fix**: Added LaunchedEffect to call `onInteraction()` when `scrollState.isScrollInProgress`
 - **File**: `TerminalKeyboard.kt` lines ~181-186
 
+#### Disconnect Dialog Reconnect Option
+- **Feature**: Added "Reconnect" button to disconnect prompt (Close/Reconnect/Stay)
+- **Files**: `PromptManager.kt` (DisconnectPrompt, DisconnectAction), `TerminalBridgePrompts.kt`, `InlinePrompt.kt`, `TerminalBridge.kt`
+
+#### Disconnect Prompt Styling
+- Made disconnect prompt fully opaque with white top border for visibility against dark terminal
+- **File**: `InlinePrompt.kt` - `DisconnectPromptContent()`
+
+#### Horizontal Flick Gestures
+- **Feature**: Flick right → jump to leftmost position, flick left → jump to rightmost position
+- Requires velocity > 1500 px/sec and horizontal velocity 2x greater than vertical
+- **File**: `termlib/.../Terminal.kt` - scroll gesture end handler (~line 1042)
+
+#### Scroll Indicator Position Fix
+- **Problem**: Horizontal scroll indicator floated too high when "Special keys always visible" enabled
+- **Cause**: Double-offsetting (Terminal padding + indicator offset both applied)
+- **Fix**: Removed redundant `horizontalScrollIndicatorBottomOffset`, Terminal padding handles positioning
+- **File**: `ConsoleScreen.kt` line 474
+
 ### Extended Keyboard Protocols (Jan 2025)
 Enables Shift+Enter, Ctrl+Enter, and other modifier combinations for modern CLI tools like Claude Code.
 
