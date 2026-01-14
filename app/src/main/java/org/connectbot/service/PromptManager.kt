@@ -140,6 +140,23 @@ class PromptManager {
     }
 
     /**
+     * Request a disconnect prompt (close/reconnect/stay dialog)
+     */
+    suspend fun requestDisconnectPrompt(message: String): DisconnectAction {
+        val deferred = CompletableDeferred<PromptResponse>()
+        currentDeferred = deferred
+
+        _promptState.update {
+            PromptRequest.DisconnectPrompt(message = message)
+        }
+
+        val response = deferred.await()
+        _promptState.update { null }
+
+        return (response as? PromptResponse.DisconnectResponse)?.action ?: DisconnectAction.STAY
+    }
+
+    /**
      * Respond to the current prompt
      */
     fun respond(response: PromptResponse) {
@@ -175,6 +192,10 @@ sealed class PromptRequest {
     data class BiometricPrompt(
         val keyNickname: String,
         val keystoreAlias: String
+    ) : PromptRequest()
+
+    data class DisconnectPrompt(
+        val message: String
     ) : PromptRequest()
 
     data class HostKeyFingerprintPrompt(
@@ -221,4 +242,14 @@ sealed class PromptResponse {
     data class BooleanResponse(val value: Boolean) : PromptResponse()
     data class StringResponse(val value: String?) : PromptResponse()
     data class BiometricResponse(val success: Boolean) : PromptResponse()
+    data class DisconnectResponse(val action: DisconnectAction) : PromptResponse()
+}
+
+/**
+ * Actions available when a host disconnects
+ */
+enum class DisconnectAction {
+    CLOSE,
+    RECONNECT,
+    STAY
 }

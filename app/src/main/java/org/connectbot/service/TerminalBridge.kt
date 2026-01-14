@@ -99,7 +99,8 @@ class TerminalBridge {
 
     private val dispatchers: CoroutineDispatchers
 
-    /* package */ var transport: AbsTransport? = null
+    /* package */
+    var transport: AbsTransport? = null
 
     val defaultPaint: Paint
 
@@ -227,7 +228,7 @@ class TerminalBridge {
         // Initialize TerminalEmulator with colors from scheme
         // Note: We pass the actual RGB colors (not indices) wrapped in Color objects
         terminalEmulator = TerminalEmulatorFactory.create(
-            initialRows = 24,  // Will be resized when view is attached
+            initialRows = 24, // Will be resized when view is attached
             initialCols = 80,
             defaultForeground = Color(defaultFgColor),
             defaultBackground = Color(defaultBgColor),
@@ -281,6 +282,7 @@ class TerminalBridge {
                         is TransportOperation.WriteData -> {
                             transport?.write(operation.data)
                         }
+
                         is TransportOperation.SetDimensions -> {
                             transport?.setDimensions(
                                 operation.columns,
@@ -420,8 +422,9 @@ class TerminalBridge {
             try {
                 if (newTransport.canForwardPorts()) {
                     try {
-                        for (portForward in manager.hostRepository.getPortForwardsForHost(host.id))
+                        for (portForward in manager.hostRepository.getPortForwardsForHost(host.id)) {
                             newTransport.addPortForward(portForward)
+                        }
                     } catch (e: Exception) {
                         Timber.e(e, "Failed to load port forwards for ${host.nickname}")
                         manager.reportError(
@@ -471,8 +474,10 @@ class TerminalBridge {
         if (output == null) return
 
         if (transport?.isSessionOpen() == true) {
-            Timber.e("Session established, cannot use outputLine!",
-                    IOException("outputLine call traceback"))
+            Timber.e(
+                "Session established, cannot use outputLine!",
+                IOException("outputLine call traceback")
+            )
         }
 
         synchronized(localOutput) {
@@ -496,8 +501,9 @@ class TerminalBridge {
      * and pasting clipboard.
      */
     fun injectString(string: String?) {
-        if (string == null || string.isEmpty())
+        if (string == null || string.isEmpty()) {
             return
+        }
 
         transportOperations.trySend(
             TransportOperation.WriteData(string.toByteArray(charset(encoding)))
@@ -558,8 +564,9 @@ class TerminalBridge {
      */
     val isSessionOpen: Boolean
         get() {
-            if (transport != null)
+            if (transport != null) {
                 return transport?.isSessionOpen() == true
+            }
             return false
         }
 
@@ -576,8 +583,9 @@ class TerminalBridge {
     fun dispatchDisconnect(immediate: Boolean) {
         // We don't need to do this multiple times.
         synchronized(this) {
-            if (disconnected && !immediate)
+            if (disconnected && !immediate) {
                 return
+            }
 
             disconnected = true
         }
@@ -608,13 +616,22 @@ class TerminalBridge {
                 return
             }
             scope.launch(dispatchers.io) {
-                val result = requestBooleanPrompt(
-                    message = manager.res.getString(R.string.prompt_host_disconnected),
-                    instructions = null
+                val action = requestDisconnectPrompt(
+                    manager.res.getString(R.string.prompt_host_disconnected)
                 )
-                if (result == null || result) {
-                    awaitingClose = true
-                    triggerDisconnectListener()
+                when (action) {
+                    DisconnectAction.CLOSE -> {
+                        awaitingClose = true
+                        triggerDisconnectListener()
+                    }
+
+                    DisconnectAction.RECONNECT -> {
+                        manager.requestReconnect(this@TerminalBridge)
+                    }
+
+                    DisconnectAction.STAY -> {
+                        // Do nothing, keep session open
+                    }
                 }
             }
         }
@@ -756,12 +773,12 @@ class TerminalBridge {
 //        // redraw local output if we don't have a session to receive our resize request
 //        if (transport == null) {
 //            // TODO(Terminal): write local output directly to display
-////            synchronized(localOutput) {
-////                (buffer as vt320).reset()
-////
-////                for (line in localOutput)
-////                    (buffer as vt320).putString(line)
-////            }
+// //            synchronized(localOutput) {
+// //                (buffer as vt320).reset()
+// //
+// //                for (line in localOutput)
+// //                    (buffer as vt320).putString(line)
+// //            }
 //        }
 //
 //        parent.notifyUser(String.format("%d x %d", columns, rows))
@@ -786,27 +803,21 @@ class TerminalBridge {
     /**
      * @return whether underlying transport can forward ports
      */
-    fun canFowardPorts(): Boolean {
-        return transport?.canForwardPorts() ?: false
-    }
+    fun canFowardPorts(): Boolean = transport?.canForwardPorts() ?: false
 
     /**
      * Adds the [PortForward] to the list.
      * @param portForward the port forward bean to add
      * @return true on successful addition
      */
-    fun addPortForward(portForward: PortForward): Boolean {
-        return transport?.addPortForward(portForward) ?: false
-    }
+    fun addPortForward(portForward: PortForward): Boolean = transport?.addPortForward(portForward) ?: false
 
     /**
      * Removes the [PortForward] from the list.
      * @param portForward the port forward bean to remove
      * @return true on successful removal
      */
-    fun removePortForward(portForward: PortForward): Boolean {
-        return transport?.removePortForward(portForward) ?: false
-    }
+    fun removePortForward(portForward: PortForward): Boolean = transport?.removePortForward(portForward) ?: false
 
     /**
      * @return the list of port forwards
@@ -849,9 +860,7 @@ class TerminalBridge {
     /**
      * @return whether the TerminalBridge should close
      */
-    fun isAwaitingClose(): Boolean {
-        return awaitingClose
-    }
+    fun isAwaitingClose(): Boolean = awaitingClose
 
     /**
      * @return whether this connection had started and subsequently disconnected
@@ -917,9 +926,7 @@ class TerminalBridge {
     /**
      * @return
      */
-    fun isUsingNetwork(): Boolean {
-        return transport?.usesNetwork() ?: false
-    }
+    fun isUsingNetwork(): Boolean = transport?.usesNetwork() ?: false
 
     /**
      * Capture current network state when connection established.
@@ -1089,12 +1096,10 @@ class TerminalBridge {
      * Get the font size for a specific orientation from a profile.
      * Falls back to the default fontSize if no orientation-specific size is set.
      */
-    private fun getFontSizeForOrientation(profile: org.connectbot.data.entity.Profile, isPortrait: Boolean): Int {
-        return if (isPortrait) {
-            profile.fontSizePortrait ?: profile.fontSize
-        } else {
-            profile.fontSizeLandscape ?: profile.fontSize
-        }
+    private fun getFontSizeForOrientation(profile: org.connectbot.data.entity.Profile, isPortrait: Boolean): Int = if (isPortrait) {
+        profile.fontSizePortrait ?: profile.fontSize
+    } else {
+        profile.fontSizeLandscape ?: profile.fontSize
     }
 
     /**

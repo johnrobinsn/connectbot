@@ -37,7 +37,7 @@ import timber.log.Timber
  */
 fun TerminalBridge.requestBooleanPrompt(
     instructions: String?,
-    message: String,
+    message: String
 ): Boolean? {
     return try {
         runBlocking {
@@ -62,7 +62,7 @@ fun TerminalBridge.requestBooleanPrompt(
 fun TerminalBridge.requestStringPrompt(
     instructions: String?,
     hint: String?,
-    isPassword: Boolean = false,
+    isPassword: Boolean = false
 ): String? {
     return try {
         runBlocking {
@@ -123,13 +123,36 @@ fun TerminalBridge.requestHostKeyFingerprintPrompt(
     return try {
         runBlocking {
             promptManager.requestHostKeyFingerprintPrompt(
-                hostname, keyType, keySize, serverHostKey,
-                randomArt, bubblebabble, sha256, md5
+                hostname,
+                keyType,
+                keySize,
+                serverHostKey,
+                randomArt,
+                bubblebabble,
+                sha256,
+                md5
             )
         }
     } catch (e: CancellationException) {
         // Prompt was cancelled due to connection loss - throw IOException to propagate error
         Timber.w("Attempted prompt on a closed stream.")
         return null
+    }
+}
+
+/**
+ * Request a disconnect prompt (close/reconnect/stay dialog).
+ *
+ * @param message The prompt message
+ * @return DisconnectAction indicating user's choice
+ */
+fun TerminalBridge.requestDisconnectPrompt(message: String): DisconnectAction {
+    return try {
+        runBlocking {
+            promptManager.requestDisconnectPrompt(message)
+        }
+    } catch (e: CancellationException) {
+        Timber.w("Attempted prompt on a closed stream.")
+        return DisconnectAction.STAY
     }
 }

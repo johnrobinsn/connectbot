@@ -72,6 +72,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.connectbot.R
+import org.connectbot.service.DisconnectAction
 import org.connectbot.service.PromptRequest
 import org.connectbot.service.PromptResponse
 import org.connectbot.ui.theme.terminal
@@ -111,6 +112,15 @@ fun InlinePrompt(
                     message = promptRequest.message,
                     onYes = { onResponse(PromptResponse.BooleanResponse(true)) },
                     onNo = { onResponse(PromptResponse.BooleanResponse(false)) }
+                )
+            }
+
+            is PromptRequest.DisconnectPrompt -> {
+                DisconnectPromptContent(
+                    message = promptRequest.message,
+                    onClose = { onResponse(PromptResponse.DisconnectResponse(DisconnectAction.CLOSE)) },
+                    onReconnect = { onResponse(PromptResponse.DisconnectResponse(DisconnectAction.RECONNECT)) },
+                    onStay = { onResponse(PromptResponse.DisconnectResponse(DisconnectAction.STAY)) }
                 )
             }
 
@@ -190,6 +200,48 @@ private fun BooleanPromptContent(
                 modifier = Modifier.padding(start = 8.dp)
             ) {
                 Text(stringResource(R.string.button_yes))
+            }
+        }
+    }
+}
+
+@Composable
+private fun DisconnectPromptContent(
+    message: String,
+    onClose: () -> Unit,
+    onReconnect: () -> Unit,
+    onStay: () -> Unit
+) {
+    val terminalColors = MaterialTheme.colorScheme.terminal
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(terminalColors.overlayBackground)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            color = terminalColors.overlayText,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(onClick = onStay) {
+                Text(stringResource(R.string.button_stay), color = terminalColors.overlayText)
+            }
+            TextButton(onClick = onReconnect) {
+                Text(stringResource(R.string.button_reconnect), color = terminalColors.overlayText)
+            }
+            Button(
+                onClick = onClose,
+                modifier = Modifier.padding(start = 8.dp)
+            ) {
+                Text(stringResource(R.string.button_close))
             }
         }
     }

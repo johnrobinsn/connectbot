@@ -956,6 +956,10 @@
 	<string name="button_ok">OK</string>
 	<!-- Button label for closing a dialog -->
 	<string name="button_close">Close</string>
+	<!-- Button label for reconnecting to a disconnected session -->
+	<string name="button_reconnect">Reconnect</string>
+	<!-- Button label for staying in a disconnected session without closing -->
+	<string name="button_stay">Stay</string>
 	<!-- Accessibility label for back navigation button; used for screen readers -->
 	<string name="button_back">Back</string>
 	<!-- Accessibility label for navigate up button in app bar; used for screen readers -->
