@@ -58,7 +58,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -213,11 +215,21 @@ private fun DisconnectPromptContent(
     onStay: () -> Unit
 ) {
     val terminalColors = MaterialTheme.colorScheme.terminal
+    val borderColor = Color.White
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(terminalColors.overlayBackground)
+            .drawBehind {
+                // Draw top border line
+                drawLine(
+                    color = borderColor,
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+            .background(MaterialTheme.colorScheme.surface)
             .padding(16.dp)
     ) {
         Text(
