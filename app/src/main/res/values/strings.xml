@@ -833,7 +833,7 @@
 	<string name="dialog_message_reset_all">"This will reset all 256 colors to their default values. This action cannot be undone."</string>
 
 	<!-- Displayed in the notification bar that connections are active -->
-	<string name="app_is_running">"VibeDroid is running"</string>
+	<string name="app_is_running">"VibeTTY is running"</string>
 
 	<!-- RGB color picker labels -->
 	<!-- Label for the red color component slider (0-255) in the RGB color picker -->

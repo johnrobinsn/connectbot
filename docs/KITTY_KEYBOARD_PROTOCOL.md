@@ -2,7 +2,7 @@
 
 ## Overview
 
-VibeDroid implements the [Kitty Keyboard Protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/) (also known as "progressive keyboard enhancement" or "CSI u encoding"). This protocol allows terminal applications to receive full modifier information for keys that traditionally don't report modifiers, such as Enter, Tab, Backspace, and Escape.
+VibeTTY implements the [Kitty Keyboard Protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/) (also known as "progressive keyboard enhancement" or "CSI u encoding"). This protocol allows terminal applications to receive full modifier information for keys that traditionally don't report modifiers, such as Enter, Tab, Backspace, and Escape.
 
 **Primary Use Case**: Applications like Claude Code can distinguish between Enter (submit) and Shift+Enter (newline) for multi-line input.
 
@@ -222,7 +222,7 @@ printf '\e[<u'
 
 ### Testing with Claude Code
 
-1. Enable "Enhanced keyboard protocol" in VibeDroid settings
+1. Enable "Enhanced keyboard protocol" in VibeTTY settings
 2. SSH to a host running Claude Code
 3. In Claude Code's input, press Shift+Enter
 4. Should create a newline without submitting
@@ -240,7 +240,7 @@ printf '\e[<u'
 
 ### TERM Variable
 
-Some applications check the TERM environment variable to detect Kitty support. Setting `TERM=xterm-kitty` may improve compatibility, but VibeDroid also responds to protocol queries regardless of TERM.
+Some applications check the TERM environment variable to detect Kitty support. Setting `TERM=xterm-kitty` may improve compatibility, but VibeTTY also responds to protocol queries regardless of TERM.
 
 ## References
 

@@ -1,6 +1,6 @@
 # New Features
 
-This document tracks new features added to VibeDroid.
+This document tracks new features added to VibeTTY.
 
 ## Kitty Keyboard Protocol
 

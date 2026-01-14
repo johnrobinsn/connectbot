@@ -100,9 +100,9 @@ Spotless enforces formatting:
 - Gradle files: ktlint
 - Ratchet from `origin/main` (only changed files are checked)
 
-## VibeDroid Fork Notes
+## VibeTTY Fork Notes
 
-This is **VibeDroid**, johnrobinsn's fork of ConnectBot focused on "vibe coding" - AI-assisted development on mobile.
+This is **VibeTTY**, johnrobinsn's experimental fork of ConnectBot focused on "vibe coding" - AI-assisted development on mobile.
 
 ### Git Remotes
 ```bash
@@ -137,7 +137,7 @@ Problems solved for TUI apps producing continuous output:
 Terminal.kt has debug logging enabled (grep `Log.d("Terminal"`). Remove when stable.
 
 ### App Branding
-- **App name**: "VibeDroid" (defined in `res/values/notrans.xml`)
+- **App name**: "VibeTTY" (defined in `res/values/notrans.xml`)
 - **Icon**: Cyan "V" with vibe waves + pink cursor on dark background
   - Vector drawables in `res/drawable/ic_launcher_*.xml`
   - Adaptive icon in `res/mipmap-anydpi-v26/icon.xml`
@@ -190,4 +190,4 @@ Enables Shift+Enter, Ctrl+Enter, and other modifier combinations for modern CLI 
 - `docs/KITTY_KEYBOARD_PROTOCOL.md` - Kitty keyboard protocol implementation details
 - `NEW_FEATURES.md` - Detailed implementation notes and lessons learned
 - `CLAUDE_NOTES.md` - Additional session notes
-- `README.md` - VibeDroid overview with ConnectBot attribution
+- `README.md` - VibeTTY overview with ConnectBot attribution

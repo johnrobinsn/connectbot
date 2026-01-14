@@ -18,7 +18,7 @@
  */
 -->
 <resources>
-	<string name="app_name" translatable="false">VibeDroid</string>
+	<string name="app_name" translatable="false">VibeTTY</string>
 
 	<!-- Placeholder for source port field. Should show  -->
 	<string name="portforward_source_port_placeholder">8080</string>
@@ -46,5 +46,5 @@
 	<string name="terminal_jump_prompt">[%s]</string>
 
 	<!-- Default filename for exported hosts JSON file -->
-	<string name="export_hosts_filename">vibedroid_hosts.json</string>
+	<string name="export_hosts_filename">vibetty_hosts.json</string>
 </resources>
